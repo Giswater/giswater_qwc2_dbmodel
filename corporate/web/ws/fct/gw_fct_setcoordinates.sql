@@ -1,50 +1,55 @@
+CREATE OR REPLACE FUNCTION "SCHEMA_NAME"."gw_fct_setcoordinates"(p_data json) RETURNS pg_catalog.json AS $BODY$
+
 /*
-This file is part of Giswater 3
-The program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-This version of Giswater is provided by Giswater Association
+SELECT gw_fct_setcoordinates($${
+"client":{"device":4, "infoType":1, "lang":"ES"}, "form":{}, 
+"feature":{}, 
+"data":{"x":"419528.73597232", "y":"4576490.8982585", "epsg":"25831", "device":3, "zoom_ratio":"0.14912394710811", "id":"78", "form_id":"F41"}}$$);
 */
-
-
-CREATE OR REPLACE FUNCTION SCHEMA_NAME.gw_fct_setcoordinates(
-    p_x double precision,
-    p_y double precision,
-    p_epsg integer,
-    p_device integer,
-    p_zoom_ratio double precision,
-    p_id text,
-    p_form_id text,
-	p_user_name text)
-  RETURNS json AS
-$BODY$
-
 DECLARE
---    Variables
-    v_point geometry;
-    v_version text;
-	v_prev_user_name text;
-    
+    v_x double precision;
+    v_y double precision;
+    v_epsg integer;
+    v_device integer;
+    v_zoom_ratio double precision;
+    v_id text;
+    v_form_id text;
+	v_user_name text;
+
+	
 BEGIN
 
+	
 --  Set search path to local schema
     SET search_path = "SCHEMA_NAME", public;
+	
+	-- getting input data 
+	v_x :=  ((p_data ->>'data')::json->>'x');
+	v_y :=  ((p_data ->>'data')::json->>'y');
+	v_epsg :=  ((p_data ->>'data')::json->>'epsg')::integer;
+	v_device :=  ((p_data ->>'data')::json->>'device')::integer;
+	v_zoom_ratio :=  ((p_data ->>'data')::json->>'zoom_ratio');
+	v_id :=  ((p_data ->>'data')::json->>'id')::text;
+	v_form_id = ((p_data ->>'data')::json->>'form_id')::text;
+	v_user_name := (p_data ->> 'client')::json->> 'user_name';
 
 	v_prev_user_name = current_user;
-	EXECUTE 'SET ROLE ' || p_user_name || '';
+	EXECUTE 'SET ROLE ' || v_user_name || '';
 	
 --  get api version
     EXECUTE 'SELECT row_to_json(row) FROM (SELECT value FROM config_param_system WHERE parameter=''admin_version'') row'
         INTO v_version;
     
 --   Database update
-     IF p_x IS NOT NULL AND p_y IS NOT NULL AND p_form_id='F41' THEN
-    SELECT st_closestpoint(arc.the_geom, ST_SetSRID(ST_MakePoint(p_x,p_y),p_epsg)) FROM arc ORDER BY ST_Distance(arc.the_geom, ST_SetSRID(ST_MakePoint(p_x,p_y),p_epsg)) LIMIT 1 INTO v_point;
-    UPDATE om_mincut SET exec_the_geom=v_point WHERE id=p_id::integer;
+     IF v_x IS NOT NULL AND v_y IS NOT NULL AND v_form_id='F41' THEN
+    SELECT st_closestpoint(arc.the_geom, ST_SetSRID(ST_MakePoint(v_x,v_y),v_epsg)) FROM arc ORDER BY ST_Distance(arc.the_geom, ST_SetSRID(ST_MakePoint(v_x,v_y),v_epsg)) LIMIT 1 INTO v_point;
+    UPDATE om_mincut SET exec_the_geom=v_point WHERE id=v_id::integer;
      END IF;
 
 	EXECUTE 'SET ROLE ' || v_prev_user_name || '';
 	
 -- Return
-     RETURN  SCHEMA_NAME.gw_fct_getmincut(null, null, null, p_id::integer, p_device, 'arc', 'lang', p_user_name);
+     RETURN  SCHEMA_NAME.gw_fct_getmincut(null, null, null, v_id::integer, v_device, 'arc', 'lang', v_user_name);
        
 --    Exception handling
     EXCEPTION WHEN OTHERS THEN 
@@ -52,6 +57,5 @@ BEGIN
 
 END;
 $BODY$
-  LANGUAGE plpgsql VOLATILE
-  COST 100;
+LANGUAGE 'plpgsql' VOLATILE COST 100;
 
