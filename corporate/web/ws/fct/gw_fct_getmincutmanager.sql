@@ -5,17 +5,21 @@ This version of Giswater is provided by Giswater Association
 */
 
 
-CREATE OR REPLACE FUNCTION SCHEMA_NAME.gw_fct_getmincutmanager(
-	mincut_data json,
-	device integer,
-	lang character varying,
-	p_user_name text)
+CREATE OR REPLACE FUNCTION ws_sample35.gw_fct_getmincutmanager(p_data json)
     RETURNS json
+    LANGUAGE 'plpgsql'
+    COST 100
 AS $BODY$
 /*
-SELECT SCHEMA_NAME.gw_fct_getmincutmanager(NULL,3,'es', 'test')
-SELECT SCHEMA_NAME.gw_fct_getmincutmanager($${"mincut_muni":"1","mincut_class":"1","mincut_workorder":"556-Calle de Francesc Layret","tab":"on_going"}$$,3,'es', 'test')
-SELECT SCHEMA_NAME.gw_fct_getmincutmanager($${"mincut_muni":"1","mincut_class":"1","mincut_workorder":"345-Avenida del General Prim","tab":"planified"}$$,3,'es', 'test')
+SELECT SCHEMA_NAME.gw_fct_getmincutmanager($${
+"client":{"device":4, "infoType":1, "lang":"ES", "user_name":"test"}, "form":{}, 
+"feature":{}, 
+"data":{"mincut_data":{}, "device":3, "lang":"es"}}$$);	
+
+SELECT SCHEMA_NAME.gw_fct_getmincutmanager($${
+"client":{"device":4, "infoType":1, "lang":"ES", "user_name":"test"}, "form":{}, 
+"feature":{}, 
+"data":{"mincut_data":{"mincut_muni":"1","mincut_class":"1","mincut_workorder":"556-Calle de Francesc Layret","tab":"on_going"}, "device":3, "lang":"es"}}$$);	
 */
 
 DECLARE
@@ -40,6 +44,11 @@ DECLARE
     v_workorder text;
 	
 	v_prev_user_name text;
+	
+	v_mincut_data json;
+	v_device integer;  
+	v_lang character varying;
+	v_user_name text;
 
     
 BEGIN
@@ -55,10 +64,16 @@ BEGIN
         INTO v_version;
         
 --      Get values form json
-    v_tab := mincut_data->>'tab';
-    v_muni_id := mincut_data->>'mincut_muni';
-    v_class_id := mincut_data->>'mincut_class';
-    v_workorder := mincut_data->>'mincut_workorder';
+	
+	v_mincut_data = (p_data ->> 'data')::json->> 'mincut_data';
+	v_device :=  ((p_data ->>'data')::json->>'device')::integer;
+	v_lang :=  ((p_data ->>'data')::json->>'lang');
+	v_user_name := (p_data ->> 'client')::json->> 'user_name';
+	
+    v_tab := v_mincut_data->>'tab';
+    v_muni_id := v_mincut_data->>'mincut_muni';
+    v_class_id := v_mincut_data->>'mincut_class';
+    v_workorder := v_mincut_data->>'mincut_workorder';
 
 --     Set tab
     IF v_tab IS NOT NULL THEN
