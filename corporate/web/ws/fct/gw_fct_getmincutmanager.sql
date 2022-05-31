@@ -5,7 +5,7 @@ This version of Giswater is provided by Giswater Association
 */
 
 
-CREATE OR REPLACE FUNCTION ws_sample35.gw_fct_getmincutmanager(p_data json)
+CREATE OR REPLACE FUNCTION SCHEMA_NAME.gw_fct_getmincutmanager(p_data json)
     RETURNS json
     LANGUAGE 'plpgsql'
     COST 100
@@ -57,7 +57,7 @@ BEGIN
     SET search_path = "SCHEMA_NAME", public;
     
 	v_prev_user_name = current_user;
-	EXECUTE 'SET ROLE ' || p_user_name || '';
+	EXECUTE 'SET ROLE ' || v_user_name || '';
 	
 --    get api version
     EXECUTE 'SELECT row_to_json(row) FROM (SELECT value FROM config_param_system WHERE parameter=''admin_version'') row'
