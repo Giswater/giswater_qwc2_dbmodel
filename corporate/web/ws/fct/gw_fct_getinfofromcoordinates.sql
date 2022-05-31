@@ -17,7 +17,7 @@ CREATE OR REPLACE FUNCTION SCHEMA_NAME.gw_fct_getinfofromcoordinates(
     p_device integer,
     p_info_type integer,
     p_lang character varying, 
-	p_user_name text)
+	p_cur_user text)
   RETURNS json AS
 $BODY$
 
@@ -53,7 +53,7 @@ DECLARE
     v_version text;
     v_the_geom text;
     v_tiled_layer text[];
-	v_prev_user_name text;
+	v_prev_cur_user text;
     
 BEGIN
 
@@ -61,8 +61,8 @@ BEGIN
     SET search_path = "SCHEMA_NAME", public;
     schemas_array := current_schemas(FALSE);
 	
-	v_prev_user_name = current_user;
-	EXECUTE 'SET ROLE ' || p_user_name || '';
+	v_prev_cur_user = current_user;
+	EXECUTE 'SET ROLE ' || p_cur_user || '';
 	
 --  get api version
     EXECUTE 'SELECT row_to_json(row) FROM (SELECT value FROM config_param_system WHERE parameter=''admin_version'') row'
@@ -164,7 +164,7 @@ BEGIN
 
     END LOOP;
 	
-	EXECUTE 'SET ROLE ' || v_prev_user_name || '';
+	EXECUTE 'SET ROLE ' || v_prev_cur_user || '';
 	
     --    Control NULL's
     IF v_id IS NULL THEN

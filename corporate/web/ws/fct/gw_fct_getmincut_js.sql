@@ -39,7 +39,7 @@ v_mincut_id_arg integer;
 v_device integer;
 v_element_type character varying;
 v_lang character varying;
-v_user_name text;
+v_cur_user text;
 
 
 BEGIN
@@ -63,11 +63,11 @@ BEGIN
 	v_device :=  ((p_data ->>'data')::json->>'device')::integer;
 	v_element_type :=  ((p_data ->>'data')::json->>'element_type');
 	v_lang :=  ((p_data ->>'data')::json->>'lang');
-	v_user_name := (p_data ->> 'client')::json->> 'user_name';
+	v_cur_user := (p_data ->> 'client')::json->> 'cur_user';
 	
 	IF v_device IN (1,2,3) THEN
 		--  Return
-   		RETURN  gw_fct_getmincut(v_x, v_y, v_srid_arg, v_mincut_id_arg, v_device, v_element_type, v_lang, v_user_name);
+   		RETURN  gw_fct_getmincut(v_x, v_y, v_srid_arg, v_mincut_id_arg, v_device, v_element_type, v_lang, v_cur_user);
 	END IF;
 	
 	-- mincut details

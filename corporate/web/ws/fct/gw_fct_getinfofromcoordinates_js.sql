@@ -54,7 +54,7 @@ SELECT SCHEMA_NAME.gw_fct_getinfofromcoordinates($${
 		
 WEB:
 SELECT SCHEMA_NAME.gw_fct_getinfofromcoordinates($${
-"client":{"device":4, "infoType":1, "lang":"ES", "user_name":"test"}, "form":{}, 
+"client":{"device":4, "infoType":1, "lang":"ES", "cur_user":"test"}, "form":{}, 
 "feature":{}, 
 "data":{"x":"419534.15219828", "y":"4576491.4086902", "epsg":"25831", "active_layer":"v_edit_node", 
 		"visible_layer":"{'v_edit_connec','v_edit_node','v_edit_arc','v_om_mincut','v_om_mincut_node','v_om_mincut_connec','v_om_mincut_valve','v_om_mincut_arc'}", 
@@ -109,7 +109,7 @@ v_istilemap boolean;
 v_zoom_ratio double precision;
 v_info_type integer;
 v_lang character varying;
-v_user_name text;
+v_cur_user text;
 
 
 BEGIN
@@ -145,11 +145,11 @@ BEGIN
 	v_device :=  ((p_data ->>'data')::json->>'device')::integer;
 	v_info_type :=  ((p_data ->>'data')::json->>'info_type')::integer;
 	v_lang :=  ((p_data ->>'data')::json->>'lang');
-	v_user_name := (p_data ->> 'client')::json->> 'user_name';
+	v_cur_user := (p_data ->> 'client')::json->> 'cur_user';
 	
 	IF v_device IN (1,2,3) THEN
 		--  Return
-   		RETURN  gw_fct_getinfofromcoordinates(v_x, v_y, v_epsg, v_active_layer, v_visible_layer, v_editable_layer, v_istilemap, v_zoom_ratio, v_device, v_info_type, v_lang, v_user_name);
+   		RETURN  gw_fct_getinfofromcoordinates(v_x, v_y, v_epsg, v_active_layer, v_visible_layer, v_editable_layer, v_istilemap, v_zoom_ratio, v_device, v_info_type, v_lang, v_cur_user);
 	END IF;
 
 	IF v_client_epsg IS NULL THEN v_client_epsg = v_epsg; END IF;

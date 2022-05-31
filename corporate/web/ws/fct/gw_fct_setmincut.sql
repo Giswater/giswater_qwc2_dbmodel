@@ -61,8 +61,8 @@ v_device integer;
 v_insert_data json;
 v_element_type character varying;
 v_id_arg character varying;
-v_user_name text;
-v_prev_user_name text;
+v_cur_user text;
+v_prev_cur_user text;
 	
 BEGIN
 
@@ -86,11 +86,11 @@ BEGIN
 	v_insert_data :=  ((p_data ->>'data')::json->>'insert_data');
 	v_element_type :=  ((p_data ->>'data')::json->>'element_type');
 	v_id_arg :=  ((p_data ->>'data')::json->>'id_arg');
-	v_user_name := (p_data ->> 'client')::json->> 'user_name';
+	v_cur_user := (p_data ->> 'client')::json->> 'cur_user';
 	
 	IF v_device IN (1,2,3) THEN
 		--  Return
-   		RETURN  gw_fct_upsertmincut(v_mincut_id_arg, v_x, v_y, v_srid_arg, v_device, v_insert_data, v_element_type, v_id_arg, v_user_name);
+   		RETURN  gw_fct_upsertmincut(v_mincut_id_arg, v_x, v_y, v_srid_arg, v_device, v_insert_data, v_element_type, v_id_arg, v_cur_user);
 	END IF;
 	
 	-- delete previous

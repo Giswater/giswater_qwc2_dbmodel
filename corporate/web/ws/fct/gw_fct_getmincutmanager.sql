@@ -12,12 +12,12 @@ CREATE OR REPLACE FUNCTION SCHEMA_NAME.gw_fct_getmincutmanager(p_data json)
 AS $BODY$
 /*
 SELECT SCHEMA_NAME.gw_fct_getmincutmanager($${
-"client":{"device":4, "infoType":1, "lang":"ES", "user_name":"test"}, "form":{}, 
+"client":{"device":4, "infoType":1, "lang":"ES", "cur_user":"test"}, "form":{}, 
 "feature":{}, 
 "data":{"mincut_data":{}, "device":3, "lang":"es"}}$$);	
 
 SELECT SCHEMA_NAME.gw_fct_getmincutmanager($${
-"client":{"device":4, "infoType":1, "lang":"ES", "user_name":"test"}, "form":{}, 
+"client":{"device":4, "infoType":1, "lang":"ES", "cur_user":"test"}, "form":{}, 
 "feature":{}, 
 "data":{"mincut_data":{"mincut_muni":"1","mincut_class":"1","mincut_workorder":"556-Calle de Francesc Layret","tab":"on_going"}, "device":3, "lang":"es"}}$$);	
 */
@@ -43,12 +43,12 @@ DECLARE
     v_class_id integer;
     v_workorder text;
 	
-	v_prev_user_name text;
+	v_prev_cur_user text;
 	
 	v_mincut_data json;
 	v_device integer;  
 	v_lang character varying;
-	v_user_name text;
+	v_cur_user text;
 
     
 BEGIN
@@ -56,8 +56,8 @@ BEGIN
 --    Set search path to local schema
     SET search_path = "SCHEMA_NAME", public;
     
-	v_prev_user_name = current_user;
-	EXECUTE 'SET ROLE ' || v_user_name || '';
+	v_prev_cur_user = current_user;
+	EXECUTE 'SET ROLE ' || v_cur_user || '';
 	
 --    get api version
     EXECUTE 'SELECT row_to_json(row) FROM (SELECT value FROM config_param_system WHERE parameter=''admin_version'') row'
@@ -68,7 +68,7 @@ BEGIN
 	v_mincut_data = (p_data ->> 'data')::json->> 'mincut_data';
 	v_device :=  ((p_data ->>'data')::json->>'device')::integer;
 	v_lang :=  ((p_data ->>'data')::json->>'lang');
-	v_user_name := (p_data ->> 'client')::json->> 'user_name';
+	v_cur_user := (p_data ->> 'client')::json->> 'cur_user';
 	
     v_tab := v_mincut_data->>'tab';
     v_muni_id := v_mincut_data->>'mincut_muni';
@@ -373,7 +373,7 @@ raise notice 'query_result_mincuts %', query_result_mincuts;
     formTabs := COALESCE(formTabs, '[]');
     v_version := COALESCE(v_version, '{}');
 
-	EXECUTE 'SET ROLE ' || v_prev_user_name || '';
+	EXECUTE 'SET ROLE ' || v_prev_cur_user || '';
 	
 --    Return
     RETURN ('{"status":"Accepted"' ||

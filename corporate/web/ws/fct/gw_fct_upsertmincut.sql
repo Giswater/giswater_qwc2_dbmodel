@@ -14,7 +14,7 @@ CREATE OR REPLACE FUNCTION SCHEMA_NAME.gw_fct_upsertmincut(
     insert_data json,
     p_element_type character varying,
     id_arg character varying,
-	p_user_name text)
+	p_cur_user text)
   RETURNS json AS
 $BODY$
 
@@ -60,7 +60,7 @@ DECLARE
     v_geometry_return text;
     xid_arg  character varying;
     id_arg_arr character varying[];
-	v_prev_user_name text;
+	v_prev_cur_user text;
     
 BEGIN
 
@@ -68,8 +68,8 @@ BEGIN
     SET search_path = "SCHEMA_NAME", public;   
     schemas_array := current_schemas(FALSE);
 	
-	v_prev_user_name = current_user;
-	EXECUTE 'SET ROLE ' || p_user_name || '';
+	v_prev_cur_user = current_user;
+	EXECUTE 'SET ROLE ' || p_cur_user || '';
 	
 --    Get api version
     EXECUTE 'SELECT row_to_json(row) FROM (SELECT value FROM config_param_system WHERE parameter=''admin_version'') row'
@@ -267,7 +267,7 @@ BEGIN
 
     raise notice ' v_mincut_return %', v_mincut_return;
 		
-	EXECUTE 'SET ROLE ' || v_prev_user_name || '';
+	EXECUTE 'SET ROLE ' || v_prev_cur_user || '';
 	
 --    Return
     RETURN ('{"status":"Accepted"' ||

@@ -13,7 +13,7 @@ CREATE OR REPLACE FUNCTION SCHEMA_NAME.gw_fct_getmincut(
     device integer,
     p_element_type character varying,
     lang character varying,
-	p_user_name text)
+	p_cur_user text)
   RETURNS json AS
 $BODY$
 /*
@@ -65,7 +65,7 @@ DECLARE
     V_street_centroid public.geometry;
    	v_visible_layers text;
 	
-	v_prev_user_name text;
+	v_prev_cur_user text;
 
 
     
@@ -75,8 +75,8 @@ BEGIN
 --    Set search path to local schema
     SET search_path = "SCHEMA_NAME", public;
 
-	v_prev_user_name = current_user;
-	EXECUTE 'SET ROLE ' || p_user_name || '';
+	v_prev_cur_user = current_user;
+	EXECUTE 'SET ROLE ' || p_cur_user || '';
   
 --    Get api version
     EXECUTE 'SELECT row_to_json(row) FROM (SELECT value FROM config_param_system WHERE parameter=''admin_version'') row'
@@ -444,7 +444,7 @@ BEGIN
     v_visible_layers := COALESCE(v_visible_layers, '{}');
      v_mincut_valve_layer_json := COALESCE(v_mincut_valve_layer_json, '{}');
   
-  	EXECUTE 'SET ROLE ' || v_prev_user_name || '';
+  	EXECUTE 'SET ROLE ' || v_prev_cur_user || '';
 	
 --    Return
     RETURN ('{"status":"Accepted"' ||

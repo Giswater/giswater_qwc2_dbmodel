@@ -14,7 +14,7 @@ DECLARE
     v_zoom_ratio double precision;
     v_id text;
     v_form_id text;
-	v_user_name text;
+	v_cur_user text;
 
 	
 BEGIN
@@ -31,10 +31,10 @@ BEGIN
 	v_zoom_ratio :=  ((p_data ->>'data')::json->>'zoom_ratio');
 	v_id :=  ((p_data ->>'data')::json->>'id')::text;
 	v_form_id = ((p_data ->>'data')::json->>'form_id')::text;
-	v_user_name := (p_data ->> 'client')::json->> 'user_name';
+	v_cur_user := (p_data ->> 'client')::json->> 'cur_user';
 
-	v_prev_user_name = current_user;
-	EXECUTE 'SET ROLE ' || v_user_name || '';
+	v_prev_cur_user = current_user;
+	EXECUTE 'SET ROLE ' || v_cur_user || '';
 	
 --  get api version
     EXECUTE 'SELECT row_to_json(row) FROM (SELECT value FROM config_param_system WHERE parameter=''admin_version'') row'
@@ -46,10 +46,10 @@ BEGIN
     UPDATE om_mincut SET exec_the_geom=v_point WHERE id=v_id::integer;
      END IF;
 
-	EXECUTE 'SET ROLE ' || v_prev_user_name || '';
+	EXECUTE 'SET ROLE ' || v_prev_cur_user || '';
 	
 -- Return
-     RETURN  SCHEMA_NAME.gw_fct_getmincut(null, null, null, v_id::integer, v_device, 'arc', 'lang', v_user_name);
+     RETURN  SCHEMA_NAME.gw_fct_getmincut(null, null, null, v_id::integer, v_device, 'arc', 'lang', v_cur_user);
        
 --    Exception handling
     EXCEPTION WHEN OTHERS THEN 

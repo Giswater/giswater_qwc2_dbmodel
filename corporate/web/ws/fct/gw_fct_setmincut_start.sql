@@ -14,8 +14,8 @@ DECLARE
 
     v_mincut_id int4;
 	v_device int4;
-	v_user_name text;
-	v_prev_user_name text;
+	v_cur_user text;
+	v_prev_cur_user text;
 
 BEGIN
 
@@ -25,10 +25,10 @@ BEGIN
 	-- getting input data 
 	v_mincut_id :=  ((p_data ->>'data')::json->>'mincut_id');
 	v_device :=  ((p_data ->>'data')::json->>'device')::integer;
-	v_user_name := (p_data ->> 'client')::json->> 'user_name';
+	v_cur_user := (p_data ->> 'client')::json->> 'cur_user';
 	
-	v_prev_user_name = current_user;
-	EXECUTE 'SET ROLE ' || v_user_name || '';
+	v_prev_cur_user = current_user;
+	EXECUTE 'SET ROLE ' || v_cur_user || '';
 	
 --  get api version
     EXECUTE 'SELECT row_to_json(row) FROM (SELECT value FROM config_param_system WHERE parameter=''admin_version'') row'
@@ -48,10 +48,10 @@ BEGIN
     v_mincut_feature = 'hydrometer';
     END IF;
 	
-	EXECUTE 'SET ROLE ' || v_prev_user_name || '';
+	EXECUTE 'SET ROLE ' || v_prev_cur_user || '';
 	
 --    Return
-     RETURN  SCHEMA_NAME.gw_fct_getmincut(null, null, null, v_mincut_id::integer, v_device, v_mincut_feature, 'lang', v_user_name);
+     RETURN  SCHEMA_NAME.gw_fct_getmincut(null, null, null, v_mincut_id::integer, v_device, v_mincut_feature, 'lang', v_cur_user);
 
 
 --    Exception handling
