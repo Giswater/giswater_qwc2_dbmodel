@@ -15,6 +15,7 @@ DECLARE
     v_id text;
     v_form_id text;
 	v_cur_user text;
+	v_prev_cur_user text;
 
 	
 BEGIN
@@ -34,7 +35,9 @@ BEGIN
 	v_cur_user := (p_data ->> 'client')::json->> 'cur_user';
 
 	v_prev_cur_user = current_user;
-	EXECUTE 'SET ROLE ' || v_cur_user || '';
+	IF v_cur_user THEN
+		EXECUTE 'SET ROLE ' || v_cur_user || '';
+	END IF;
 	
 --  get api version
     EXECUTE 'SELECT row_to_json(row) FROM (SELECT value FROM config_param_system WHERE parameter=''admin_version'') row'

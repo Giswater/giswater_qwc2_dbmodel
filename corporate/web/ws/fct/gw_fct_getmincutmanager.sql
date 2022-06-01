@@ -55,9 +55,6 @@ BEGIN
 
 --    Set search path to local schema
     SET search_path = "SCHEMA_NAME", public;
-    
-	v_prev_cur_user = current_user;
-	EXECUTE 'SET ROLE ' || v_cur_user || '';
 	
 --    get api version
     EXECUTE 'SELECT row_to_json(row) FROM (SELECT value FROM config_param_system WHERE parameter=''admin_version'') row'
@@ -74,6 +71,11 @@ BEGIN
     v_muni_id := v_mincut_data->>'mincut_muni';
     v_class_id := v_mincut_data->>'mincut_class';
     v_workorder := v_mincut_data->>'mincut_workorder';
+	
+	v_prev_cur_user = current_user;
+	IF v_cur_user THEN
+		EXECUTE 'SET ROLE ' || v_cur_user || '';
+	END IF;
 
 --     Set tab
     IF v_tab IS NOT NULL THEN

@@ -4,7 +4,7 @@ The program is free software: you can redistribute it and/or modify it under the
 This version of Giswater is provided by Giswater Association
 */
 
-
+DROP FUNCTION SCHEMA_NAME.gw_fct_getinfofromcoordinates(double precision,double precision,integer,text,text,text,boolean,double precision,integer,integer,character varying,text);
 CREATE OR REPLACE FUNCTION SCHEMA_NAME.gw_fct_getinfofromcoordinates(
     p_x double precision,
     p_y double precision,

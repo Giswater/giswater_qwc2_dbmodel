@@ -4,6 +4,7 @@ The program is free software: you can redistribute it and/or modify it under the
 This version of Giswater is provided by Giswater Association
 */
 
+DROP FUNCTION SCHEMA_NAME.gw_fct_upsertmincut(integer,  double precision, double precision, integer,  integer,  json,  character varying,  character varying, text);
 
 CREATE OR REPLACE FUNCTION SCHEMA_NAME.gw_fct_upsertmincut(
     mincut_id_arg integer,

@@ -4,7 +4,7 @@ The program is free software: you can redistribute it and/or modify it under the
 This version of Giswater is provided by Giswater Association
 */
 
-
+DROP FUNCTION SCHEMA_NAME.gw_fct_getmincut(double precision, double precision, integer, integer,   integer,  character varying, character varying, text);
 CREATE OR REPLACE FUNCTION SCHEMA_NAME.gw_fct_getmincut(
     x double precision,
     y double precision,
